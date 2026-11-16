@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="pt" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O BAIRRO-DO-NÃO-TE-ERRITES | Tampo Oficial • Angola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardNavy: '#111827',
+                        cardBorder: '#1e293b',
+                        accentAmber: '#f59e0b',
+                        accentRose: '#f43f5e',
+                        accentBlue: '#3b82f6',
+                        accentEmerald: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0b0f19; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        .card-navy { background-color: #111827; border: 1px solid #1e293b; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .glass-modal { background-color: rgba(11, 15, 25, 0.92); backdrop-filter: blur(16px); }
+        .tab-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row pb-24 lg:pb-0 selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- ECRÃ DE LOGIN / AUTENTICAÇÃO -->
+    <div id="authOverlay" class="fixed inset-0 z-50 glass-modal flex items-center justify-center p-4">
+        <div class="card-navy w-full max-w-md p-6 sm:p-8 space-y-6 border-slate-800 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-36 h-36 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="text-center space-y-2 relative z-10">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-rose-500 via-amber-500 to-amber-400 flex items-center justify-center text-white text-3xl shadow-xl shadow-amber-500/20">🎲</div>
+                <h1 class="text-xl font-black text-white uppercase tracking-tight">O BAIRRO-DO-NÃO-TE-ERRITES</h1>
+                <p class="text-xs text-amber-400 font-bold uppercase tracking-wider">Tampo Oficial • Angola</p>
+            </div>
+            
+            <div class="space-y-4 text-xs relative z-10">
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1.5">Modo de Acesso do Dispositivo</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" onclick="selectDevice('pc')" id="btnDevPC" class="p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"><i class="fa-solid fa-desktop text-amber-400"></i> Computador</button>
+                        <button type="button" onclick="selectDevice('mobile')" id="btnDevMobile" class="p-3 rounded-xl border border-amber-500 bg-amber-500/15 text-white font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"><i class="fa-solid fa-mobile-screen text-amber-400"></i> Telemóvel</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1.5">Selecionar Utilizador / Membro</label>
+                    <select id="loginMemberSelect" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-semibold focus:border-amber-500 transition-colors"></select>
+                </div>
+                
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1.5">Palavra-passe (Padrão Inicial: 1234)</label>
+                    <input type="password" id="loginPasswordInput" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none focus:border-amber-500 transition-colors">
+                </div>
+                
+                <p id="loginErrorMsg" class="text-rose-400 text-[11px] font-bold text-center hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20"></p>
+                
+                <button type="button" onclick="executeLogin()" class="w-full bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 hover:to-rose-700 text-white font-black py-3.5 rounded-xl uppercase shadow-lg shadow-amber-500/20 cursor-pointer transition-all">Entrar no Sistema</button>
+                
+                <button type="button" onclick="resetSystemData()" class="w-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl uppercase text-[11px] cursor-pointer transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-rotate-right"></i> Repor Dados de Fábrica (Reset)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1º LOGIN (ALTERAR PASSWORD) -->
+    <div id="firstLoginModal" class="hidden fixed inset-0 z-50 glass-modal flex items-center justify-center p-4">
+        <div class="card-navy w-full max-w-sm p-6 rounded-3xl shadow-2xl space-y-5 text-xs">
+            <div class="text-center space-y-1.5">
+                <span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full font-bold uppercase text-[10px]">Segurança Obrigatória</span>
+                <h3 class="text-lg font-black text-white mt-2">Criar Palavra-passe Pessoal</h3>
+                <p class="text-slate-400">Por segurança, altere a sua palavra-passe inicial antes de prosseguir.</p>
+            </div>
+            <div>
+                <label class="font-bold text-slate-300 block mb-1">Nova Palavra-passe (Mín. 4 caracteres)</label>
+                <input type="password" id="newPersonalPass" placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none focus:border-amber-500">
+            </div>
+            <button type="button" onclick="savePersonalPassword()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase shadow-lg cursor-pointer transition-all">Guardar e Aceder</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO / EDIÇÃO DE MEMBRO -->
+    <div id="memberFormModal" class="hidden fixed inset-0 z-50 glass-modal flex items-center justify-center p-4">
+        <div class="card-navy w-full max-w-md p-6 rounded-3xl shadow-2xl space-y-4 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 id="memberFormTitle" class="text-base font-black text-white">Cadastrar Membro</h3>
+                <button type="button" onclick="closeMemberForm()" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <input type="hidden" id="editMemberId">
+            <div>
+                <label class="font-bold text-slate-300 block mb-1">Nome Completo / Alcunha *</label>
+                <input type="text" id="memberNameInput" placeholder="Ex: Alano Bango" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none focus:border-amber-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1">Estado</label>
+                    <select id="memberStatusInput" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none">
+                        <option value="ativo">🟢 Ativo</option>
+                        <option value="inativo">🟡 Inativo / Ausente</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-bold text-slate-300 block mb-1">Nível de Acesso</label>
+                    <select id="memberRoleInput" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none">
+                        <option value="member">Membro Oficial</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+            </div>
+            <div id="memberPassGroup">
+                <label class="font-bold text-slate-300 block mb-1">Palavra-passe Inicial</label>
+                <input type="text" id="memberPassInput" value="1234" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none">
+            </div>
+            <button type="button" onclick="saveMemberForm()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase shadow-lg cursor-pointer transition-all">Guardar Membro</button>
+        </div>
+    </div>
+
+    <!-- MODAL PERFIL INDIVIDUAL DO MEMBRO -->
+    <div id="memberProfileModal" class="hidden fixed inset-0 z-50 glass-modal flex items-center justify-center p-4 overflow-y-auto">
+        <div class="card-navy w-full max-w-lg p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6 text-xs my-auto relative">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <span class="text-[10px] font-bold uppercase text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">Ficha Individual Oficial</span>
+                <button type="button" onclick="closeMemberProfile()" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                <div class="relative group">
+                    <img id="profModalAvatar" src="" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-amber-500 shadow-xl" alt="Avatar">
+                    <label id="profChangePhotoBtn" class="hidden absolute -bottom-2 -right-2 w-9 h-9 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 flex items-center justify-center cursor-pointer shadow-lg transition-all">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                        <input type="file" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)">
+                    </label>
+                </div>
+                <div class="space-y-1.5 flex-1">
+                    <h3 id="profModalName" class="text-xl sm:text-2xl font-black text-white">---</h3>
+                    <div class="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
+                        <span id="profModalRole" class="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full font-bold text-[10px]">---</span>
+                        <span id="profModalStatus" class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full font-bold text-[10px]">---</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800"><div class="text-[9px] text-slate-400 font-bold uppercase">Vitórias</div><div id="profStatVitorias" class="text-lg sm:text-xl font-black text-amber-400 mt-1">0</div></div>
+                <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800"><div class="text-[9px] text-slate-400 font-bold uppercase">Capotes</div><div id="profStatCapotes" class="text-lg sm:text-xl font-black text-blue-400 mt-1">0</div></div>
+                <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800"><div class="text-[9px] text-slate-400 font-bold uppercase">Generais</div><div id="profStatGenerais" class="text-lg sm:text-xl font-black text-rose-400 mt-1">0</div></div>
+                <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800"><div class="text-[9px] text-slate-400 font-bold uppercase">% Vitória</div><div id="profStatTaxa" class="text-lg sm:text-xl font-black text-emerald-400 mt-1">0%</div></div>
+            </div>
+            <div class="space-y-2.5">
+                <h4 class="font-bold text-slate-300 uppercase text-[11px] tracking-wider"><i class="fa-solid fa-clock-rotate-left mr-1.5 text-amber-400"></i> Histórico de Partidas Recentes</h4>
+                <div id="profHistoryList" class="max-h-48 overflow-y-auto custom-scrollbar space-y-2 bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AGENDAR PARTIDA -->
+    <div id="scheduleMatchModal" class="hidden fixed inset-0 z-50 glass-modal flex items-center justify-center p-4">
+        <div class="card-navy w-full max-w-md p-6 rounded-3xl shadow-2xl space-y-4 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-black text-white"><i class="fa-solid fa-calendar-plus text-amber-400 mr-2"></i> Agendar Nova Partida</h3>
+                <button type="button" onclick="closeScheduleModal()" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="font-bold text-slate-300 block mb-1">Data *</label><input type="date" id="schedDateInput" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></div>
+                <div><label class="font-bold text-slate-300 block mb-1">Horário *</label><input type="time" id="schedTimeInput" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></div>
+            </div>
+            <div><label class="font-bold text-slate-300 block mb-1">Participante 1 (Cadeira 1) *</label><select id="schedSeat1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+            <div><label class="font-bold text-slate-300 block mb-1">Participante 2 (Cadeira 2) *</label><select id="schedSeat2" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+            <div><label class="font-bold text-slate-300 block mb-1">Participante 3 (Cadeira 3) *</label><select id="schedSeat3" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+            <div><label class="font-bold text-slate-300 block mb-1">Participante 4 (Cadeira 4) *</label><select id="schedSeat4" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+            <button type="button" onclick="saveScheduledMatch()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-xl uppercase shadow-lg cursor-pointer transition-all">Guardar Agendamento</button>
+        </div>
+    </div>
+
+    <!-- MENU LATERAL (COMPUTADOR) -->
+    <aside id="desktopSidebar" class="hidden lg:flex w-72 bg-[#0d121f] border-r border-slate-800/80 flex-col justify-between p-5 shrink-0 h-screen sticky top-0">
+        <div>
+            <div class="flex items-center gap-3.5 px-2 py-3 mb-6">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-amber-500/20">🎲</div>
+                <div class="min-w-0">
+                    <h1 class="font-black text-xs tracking-tight text-white uppercase truncate">O BAIRRO-DO-NÃO-TE-ERRITES</h1>
+                    <span class="text-[11px] text-amber-400 font-bold">Tampo Oficial • Angola</span>
+                </div>
+            </div>
+            
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-2.5">Navegação Principal</div>
+            <nav class="space-y-1.5 text-xs font-semibold">
+                <button type="button" onclick="navigate('painel')" id="dnav-painel" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition bg-blue-600/20 text-blue-400 border border-blue-500/30 cursor-pointer"><i class="fa-solid fa-gauge-high w-4"></i> 01. Painel Principal</button>
+                <button type="button" onclick="navigate('membros')" id="dnav-membros" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer"><i class="fa-solid fa-users w-4"></i> 02. Membros</button>
+                <button type="button" onclick="navigate('mesa')" id="dnav-mesa" class="w-full flex items-center justify-between px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer">
+                    <span class="flex items-center gap-3"><i class="fa-solid fa-dice w-4"></i> 03. Mesa de Jogo</span>
+                    <span id="badgeMesaSidebar" class="hidden bg-rose-500/20 text-rose-400 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase animate-pulse">AO VIVO</span>
+                </button>
+                <button type="button" onclick="navigate('classificacao')" id="dnav-classificacao" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer"><i class="fa-solid fa-trophy w-4"></i> 04. Classificação</button>
+                <button type="button" onclick="navigate('agenda')" id="dnav-agenda" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer"><i class="fa-solid fa-calendar-check w-4"></i> 05. Agenda e Regulamento</button>
+                <button type="button" onclick="navigate('galeria')" id="dnav-galeria" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer"><i class="fa-solid fa-photo-film w-4"></i> 06. Galeria Multimédia</button>
+                <button type="button" onclick="navigate('relatorios')" id="dnav-relatorios" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer"><i class="fa-solid fa-chart-pie w-4"></i> 07. Estatísticas e Mapas</button>
+            </nav>
+        </div>
+        
+        <div class="pt-4 border-t border-slate-800/80 space-y-3">
+            <div onclick="openMemberProfile(currentUser.id)" class="flex items-center gap-3 px-2 py-2 cursor-pointer hover:bg-slate-800/50 rounded-xl transition-all">
+                <img id="sidebarAvatar" src="" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shadow-md" alt="Avatar">
+                <div class="min-w-0 flex-1">
+                    <p id="sidebarUserName" class="text-xs font-bold text-white truncate">---</p>
+                    <p id="sidebarUserRole" class="text-[10px] text-amber-400 font-semibold truncate">---</p>
+                </div>
+            </div>
+            <button type="button" onclick="logoutSystem()" class="w-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 font-bold py-2.5 rounded-xl text-xs cursor-pointer transition-all flex items-center justify-center gap-1.5"><i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão</button>
+        </div>
+    </aside>
+
+    <!-- BARRA INFERIOR FIXA (TELEMÓVEL) -->
+    <nav id="mobileBottomNav" class="hidden lg:hidden fixed bottom-0 left-0 right-0 bg-[#0d121f]/95 backdrop-blur-md border-t border-slate-800 px-2 py-2 z-40 grid grid-cols-5 gap-1 text-center shadow-2xl">
+        <button type="button" onclick="navigate('painel')" id="mnav-painel" class="flex flex-col items-center justify-center py-1 text-blue-400"><i class="fa-solid fa-gauge-high text-base mb-1"></i><span class="text-[10px] font-bold">Painel</span></button>
+        <button type="button" onclick="navigate('membros')" id="mnav-membros" class="flex flex-col items-center justify-center py-1 text-slate-400"><i class="fa-solid fa-users text-base mb-1"></i><span class="text-[10px] font-semibold">Membros</span></button>
+        <button type="button" onclick="navigate('mesa')" id="mnav-mesa" class="flex flex-col items-center justify-center py-1 text-slate-400 relative"><i class="fa-solid fa-dice text-base mb-1"></i><span class="text-[10px] font-semibold">Mesa</span></button>
+        <button type="button" onclick="navigate('galeria')" id="mnav-galeria" class="flex flex-col items-center justify-center py-1 text-slate-400"><i class="fa-solid fa-photo-film text-base mb-1"></i><span class="text-[10px] font-semibold">Galeria</span></button>
+        <button type="button" onclick="navigate('relatorios')" id="mnav-relatorios" class="flex flex-col items-center justify-center py-1 text-slate-400"><i class="fa-solid fa-chart-pie text-base mb-1"></i><span class="text-[10px] font-semibold">Mapas</span></button>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 space-y-6">
+        <header class="card-navy p-4 sm:p-5 rounded-2xl flex items-center justify-between bg-gradient-to-r from-slate-900 to-[#111827]">
+            <div>
+                <h2 id="viewTitle" class="text-lg sm:text-xl font-black text-white">Painel Principal</h2>
+                <p id="viewSubtitle" class="text-xs text-slate-400">Visão geral e atividade oficial do Bairro</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="openMemberProfile(currentUser.id)" class="flex items-center gap-2 bg-slate-900 border border-slate-700 hover:border-amber-500/50 px-3 py-2 rounded-xl text-xs font-bold text-white cursor-pointer transition-all">
+                    <img id="headerAvatar" src="" class="w-7 h-7 rounded-lg object-cover" alt="Avatar">
+                    <span class="hidden sm:inline">Meu Perfil</span>
+                </button>
+                <button type="button" onclick="logoutSystem()" class="lg:hidden bg-rose-500/20 text-rose-400 p-2.5 rounded-xl text-xs"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </header>
+
+        <!-- SECÇÃO 01: PAINEL PRINCIPAL -->
+        <section id="sec-painel" class="space-y-6">
+            <div class="card-navy p-6 sm:p-8 bg-gradient-to-r from-indigo-950 via-slate-900 to-rose-950/70 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <span class="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-fire text-amber-400"></i> 4 Jogadores • 16 Peças • Tampo Oficial Angola</span>
+                <h3 class="text-2xl sm:text-3xl font-black text-white mt-4" id="welcomeUserTitle">Bem-vindo</h3>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">Sistema oficial de gestão do Bairro-do-Não-Te-Errites. Acompanhe em tempo real as partidas, estatísticas de capotes, generais e a classificação dos reis do tampo.</p>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card-navy p-5"><div class="text-[11px] font-bold text-blue-400 uppercase tracking-wider">Total de Partidas</div><div id="kpiPartidas" class="text-3xl font-black text-white mt-1.5">0</div></div>
+                <div class="card-navy p-5"><div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Membros Ativos</div><div id="kpiMembros" class="text-3xl font-black text-white mt-1.5">0</div></div>
+                <div class="card-navy p-5"><div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Capotes Aplicados</div><div id="kpiCapotes" class="text-3xl font-black text-white mt-1.5">0</div></div>
+                <div class="card-navy p-5"><div class="text-[11px] font-bold text-rose-400 uppercase tracking-wider">Generais Registados</div><div id="kpiGenerais" class="text-3xl font-black text-white mt-1.5">0</div></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="card-navy p-6 lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h4 class="font-black text-white text-xs uppercase tracking-wider"><i class="fa-solid fa-trophy text-amber-400 mr-2"></i> Top 3 Reis do Tampo (Destaques)</h4>
+                        <button type="button" onclick="navigate('classificacao')" class="text-amber-400 text-xs font-bold hover:underline cursor-pointer">Ver Ranking Completo →</button>
+                    </div>
+                    <div id="dashboardTop3" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+                </div>
+                <div class="card-navy p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h4 class="font-black text-white text-xs uppercase tracking-wider"><i class="fa-solid fa-dice text-rose-400 mr-2"></i> Estado da Mesa</h4>
+                        <span id="dashboardMesaStatusBadge" class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">Livre</span>
+                    </div>
+                    <div id="dashboardMesaBox" class="text-xs text-slate-300 space-y-3 py-2">
+                        <p>Nenhuma partida ativa neste momento. Inicie uma nova mesa ou consulte a agenda oficial.</p>
+                        <button type="button" onclick="navigate('mesa')" class="w-full bg-gradient-to-r from-amber-500 to-rose-600 text-slate-950 font-black py-3 rounded-xl uppercase shadow-lg cursor-pointer transition-all">Ir para Mesa de Jogo</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 02: MEMBROS -->
+        <section id="sec-membros" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-white">Membros Oficiais do Bairro</h3>
+                    <p class="text-xs text-slate-400">Consulte a ficha individual, estatísticas e histórico de cada participante.</p>
+                </div>
+                <button type="button" id="btnOpenAddMember" onclick="openMemberForm()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-4 py-3 rounded-xl text-xs shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all">
+                    <i class="fa-solid fa-user-plus"></i> Cadastrar Membro
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div class="sm:col-span-2 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500"></i>
+                    <input type="text" id="memberSearchInput" oninput="renderMembers()" placeholder="Pesquisar membro por nome ou alcunha..." class="w-full bg-[#111827] border border-slate-800 text-white pl-10 pr-4 py-3 rounded-xl outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <select id="memberFilterSelect" onchange="renderMembers()" class="w-full bg-[#111827] border border-slate-800 text-white p-3 rounded-xl outline-none font-semibold">
+                        <option value="todos">Todos os Membros</option>
+                        <option value="ativo">🟢 Apenas Ativos</option>
+                        <option value="inativo">🟡 Inativos / Ausentes</option>
+                        <option value="admin">👑 Administradores</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="membersGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- SECÇÃO 03: MESA DE JOGO (AO VIVO & RETROATIVO) -->
+        <section id="sec-mesa" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h4 class="text-sm font-black text-amber-400"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Registo Retroativo de Partida</h4>
+                    <p class="text-xs text-slate-300">Jogou ontem ou sem dados em tempo real? Adicione aqui o histórico de partidas passadas com os 4 jogadores e o general.</p>
+                </div>
+                <button type="button" onclick="openRetroMatchModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-3 rounded-xl text-xs uppercase shadow-lg cursor-pointer shrink-0 transition-all"><i class="fa-solid fa-plus-circle mr-1"></i> Adicionar Partida Passada</button>
+            </div>
+
+            <!-- SETUP MESA AO VIVO -->
+            <div id="mesaSetupCard" class="card-navy p-6 sm:p-8 space-y-6 max-w-3xl mx-auto">
+                <div class="border-b border-slate-800 pb-4">
+                    <span class="bg-rose-500/20 text-rose-400 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">Mesa Oficial • 4 Lugares • 16 Peças</span>
+                    <h3 class="text-xl font-black text-white mt-2">1. Seleção dos Quatro Participantes</h3>
+                    <p class="text-xs text-slate-400">Escolha exatamente 4 membros ativos diferentes. Regra: Ninguém pode entrar para assistir/jogar fora enquanto os 4 não livrarem pelo menos uma peça do perímetro de perigo.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div><label class="font-bold text-slate-300 block mb-1">Jogador 1 (Cadeira 1) *</label><select id="mesaSeat1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Jogador 2 (Cadeira 2) *</label><select id="mesaSeat2" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Jogador 3 (Cadeira 3) *</label><select id="mesaSeat3" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Jogador 4 (Cadeira 4) *</label><select id="mesaSeat4" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                </div>
+                <button type="button" onclick="startLiveMatch()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 text-slate-950 font-black py-4 rounded-xl text-xs uppercase shadow-xl shadow-amber-500/20 cursor-pointer flex items-center justify-center gap-2 transition-all"><i class="fa-solid fa-play"></i> Iniciar Partida e Cronómetro</button>
+            </div>
+
+            <!-- MESA AO VIVO EM ANDAMENTO -->
+            <div id="mesaLiveCard" class="hidden card-navy p-6 sm:p-8 space-y-6 max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase animate-pulse">● Partida Oficial em Andamento</span>
+                        <h3 class="text-xl font-black text-white mt-1">Mesa Ativa • Controlo de Peças</h3>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 px-5 py-2.5 rounded-2xl flex items-center gap-3">
+                        <i class="fa-solid fa-stopwatch text-amber-400 text-xl"></i>
+                        <span id="matchTimerDisplay" class="text-2xl font-black text-white font-mono">00:00</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-users-viewfinder mr-1.5"></i> Controlo de Andamento (Marcar quem já livrou peça do perigo)</h4>
+                    <div id="mesaVisualGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                </div>
+                
+                <div class="border-t border-slate-800 pt-5 space-y-4">
+                    <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider"><i class="fa-solid fa-flag-checkered mr-1.5"></i> Conclusão e Registo do Resultado</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                        <div><label class="font-bold text-slate-300 block mb-1">1º Lugar (Vencedor) *</label><select id="resWinnerSelect" onchange="updatePodiumOptions()" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-bold text-amber-400"></select></div>
+                        <div><label class="font-bold text-slate-300 block mb-1">Tipo de Desfecho *</label><select id="resOutcomeSelect" onchange="toggleOutcomeType()" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-semibold"><option value="normal">General Único (1 preso / erritado)</option><option value="capote">Capote Total (Vencedor sobre os 3)</option></select></div>
+                        <div id="resGeneralBox"><label class="font-bold text-slate-300 block mb-1">General (Último / Erritado) *</label><select id="resGeneralSelect" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-bold text-rose-400"></select></div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="cancelLiveMatch()" class="bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 font-bold px-5 py-3 rounded-xl text-xs cursor-pointer transition-all">Cancelar Partida</button>
+                    <button type="button" onclick="finalizeLiveMatch()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-slate-950 font-black py-3.5 rounded-xl text-xs uppercase shadow-xl cursor-pointer transition-all">Concluir e Guardar na Nuvem</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODAL REGISTO RETROATIVO DE PARTIDA -->
+        <div id="retroMatchModal" class="hidden fixed inset-0 z-50 glass-modal flex items-center justify-center p-4">
+            <div class="card-navy w-full max-w-lg p-6 sm:p-8 rounded-3xl shadow-2xl space-y-5 text-xs max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="text-base font-black text-white"><i class="fa-solid fa-clock-rotate-left text-amber-400 mr-2"></i> Adicionar Partida Passada</h3>
+                    <button type="button" onclick="closeRetroMatchModal()" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark text-base"></i></button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="font-bold text-slate-300 block mb-1">Cadeira 1 *</label><select id="retroSeat1" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Cadeira 2 *</label><select id="retroSeat2" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Cadeira 3 *</label><select id="retroSeat3" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Cadeira 4 *</label><select id="retroSeat4" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></select></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="font-bold text-slate-300 block mb-1">Vencedor (1º Lugar) *</label><select id="retroWinnerSelect" onchange="updateRetroGeneralOptions()" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-bold text-amber-400"></select></div>
+                    <div><label class="font-bold text-slate-300 block mb-1">Tipo de Desfecho *</label><select id="retroOutcomeSelect" onchange="toggleRetroOutcome()" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-semibold"><option value="normal">General Único</option><option value="capote">Capote Total</option></select></div>
+                </div>
+                <div id="retroGeneralBox"><label class="font-bold text-slate-300 block mb-1">General (Último / Erritado) *</label><select id="retroGeneralSelect" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none font-bold text-rose-400"></select></div>
+                <div><label class="font-bold text-slate-300 block mb-1">Data da Partida *</label><input type="date" id="retroDateInput" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl outline-none"></div>
+                <button type="button" onclick="saveRetroMatch()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3.5 rounded-xl uppercase shadow-lg cursor-pointer transition-all">Guardar Partida Passada</button>
+            </div>
+        </div>
+
+        <!-- SECÇÃO 04: CLASSIFICAÇÃO -->
+        <section id="sec-classificacao" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-white">Classificação Geral e Pódio dos Reis do Tampo</h3>
+                    <p class="text-xs text-slate-400">Ranking oficial ordenado por vitórias, capotes, generais e aproveitamento.</p>
+                </div>
+                <div class="flex gap-2 text-xs font-bold"><span id="badgeMostActivePlayer" class="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-3.5 py-1.5 rounded-xl">---</span></div>
+            </div>
+            
+            <div id="rankingTop3Container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            
+            <div class="card-navy overflow-hidden">
+                <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
+                    <h4 class="font-black text-white text-xs uppercase tracking-wider"><i class="fa-solid fa-ranking-star text-amber-400 mr-2"></i> Tabela Completa do Ranking Oficial</h4>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/90 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3.5 text-center w-16">Pos</th>
+                                <th class="p-3.5">Jogador / Membro</th>
+                                <th class="p-3.5 text-center">Vitórias</th>
+                                <th class="p-3.5 text-center">Capotes</th>
+                                <th class="p-3.5 text-center">Generais</th>
+                                <th class="p-3.5 text-center">Participações</th>
+                                <th class="p-3.5 text-center">% Vitória</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 05: AGENDA, CALENDÁRIO E REGULAMENTO -->
+        <section id="sec-agenda" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-white">Agenda, Calendário e Regulamento Oficial</h3>
+                    <p class="text-xs text-slate-400">Consulte os próximos confrontos agendados, histórico e regras do jogo.</p>
+                </div>
+                <button type="button" onclick="openScheduleModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-3 rounded-xl text-xs shadow-lg flex items-center gap-2 cursor-pointer transition-all"><i class="fa-solid fa-calendar-plus"></i> Agendar Partida</button>
+            </div>
+            
+            <div class="flex gap-2 border-b border-slate-800 pb-3 text-xs font-bold overflow-x-auto">
+                <button type="button" onclick="switchAgendaTab('agendadas')" id="tabBtnAgendadas" class="px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 transition-all cursor-pointer shrink-0">📅 Próximas Partidas</button>
+                <button type="button" onclick="switchAgendaTab('historico')" id="tabBtnHistorico" class="px-4 py-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0">📜 Histórico e Pesquisa</button>
+                <button type="button" onclick="switchAgendaTab('regulamento')" id="tabBtnRegulamento" class="px-4 py-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0">📖 Regulamento do Jogo</button>
+            </div>
+            
+            <div id="agendaAgendadasPane" class="space-y-3"><div id="scheduledMatchesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>
+            
+            <div id="agendaHistoricoPane" class="hidden space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="relative"><i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500"></i><input type="text" id="historySearchInput" oninput="renderHistory()" placeholder="Pesquisar vencedor, Nº ou detalhe..." class="w-full bg-[#111827] border border-slate-800 text-white pl-10 pr-4 py-3 rounded-xl outline-none"></div>
+                    <div><input type="date" id="historyDateFilter" onchange="renderHistory()" class="w-full bg-[#111827] border border-slate-800 text-white p-3 rounded-xl outline-none font-semibold"></div>
+                </div>
+                <div id="historyMatchesList" class="space-y-3"></div>
+            </div>
+            
+            <div id="agendaRegulamentoPane" class="hidden card-navy p-6 sm:p-8 space-y-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <h4 class="text-base font-black text-amber-400 uppercase"><i class="fa-solid fa-book-open mr-2"></i> Regulamento Oficial do Bairro-do-Não-Te-Errites (Tampo)</h4>
+                <ol class="list-decimal list-inside space-y-3">
+                    <li><strong>Composição da Mesa:</strong> Cada partida é disputada exatamente por 4 elementos (jogadores), totalizando 16 peças distribuídas no tampo oficial.</li>
+                    <li><strong>Regra do Perímetro de Perigo (Livrar):</strong> Enquanto nenhum dos 4 jogadores conseguir "livrar" pelo menos uma peça do perímetro inicial de perigo, nenhum participante de fora pode entrar ou participar.</li>
+                    <li><strong>Dinâmica do Capoteiro e Compadres:</strong> Assim que um ou mais jogadores livrarem as suas peças, o último participante que não conseguir livrar nenhuma ganha o título de <em>Capoteiro</em>. Os restantes chamam-se <em>Compadres</em>.</li>
+                    <li><strong>Aniquilação Mutuamente Acordada:</strong> Os compadres já não se podem matar entre si; ficam todos focados em bloquear e impedir o capoteiro até que todos terminem, sem que o capoteiro consiga livrar nenhuma.</li>
+                    <li><strong>O General (Erritado / Abusado):</strong> Se o capoteiro terminar a partida sem conseguir livrar nenhuma peça enquanto os outros concluíram, ele leva um <em>General</em> (Fica erritado e abusado perante o Bairro!).</li>
+                    <li><strong>Cronometragem e Registo:</strong> Todas as partidas possuem cronómetro ativo. No final, o administrador regista a ordem de chegada e o desfecho oficial.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 06: GALERIA MULTIMÉDIA -->
+        <section id="sec-galeria" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-white">Galeria Multimédia do Bairro</h3>
+                    <p class="text-xs text-slate-400">Carregue e partilhe fotografias e vídeos dos momentos épicos, jogos e ressacas.</p>
+                </div>
+                <label class="bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-600 text-slate-950 font-black px-4 py-3 rounded-xl text-xs uppercase shadow-lg cursor-pointer flex items-center gap-2 transition-all shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Carregar Foto ou Vídeo
+                    <input type="file" accept="image/*,video/*" class="hidden" onchange="uploadMediaFile(event)">
+                </label>
+            </div>
+            <div id="mediaGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- SECÇÃO 07: ESTATÍSTICAS E MAPAS -->
+        <section id="sec-relatorios" class="hidden space-y-6">
+            <div class="card-navy p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-white">Mapas de Estatísticas e Relatórios</h3>
+                    <p class="text-xs text-slate-400">Análise temporal diária, semanal, mensal e anual com gráficos elegantes e exportação.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <select id="reportPeriodSelect" onchange="renderReports()" class="bg-slate-900 border border-slate-700 text-amber-400 font-bold p-2.5 rounded-xl outline-none text-xs">
+                        <option value="geral">📊 Todos os Registos (Geral)</option>
+                        <option value="diario">📅 Hoje (Diário)</option>
+                        <option value="semanal">📆 Esta Semana</option>
+                        <option value="mensal">🗓️ Este Mês</option>
+                        <option value="anual">🏆 Este Ano</option>
+                    </select>
+                    <button type="button" onclick="exportOfficialReport()" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg flex items-center gap-2 cursor-pointer transition-all">
+                        <i class="fa-solid fa-download"></i> Exportar Relatório (.txt)
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                <div class="card-navy p-4"><div class="text-[11px] font-bold text-blue-400 uppercase">Partidas no Período</div><div id="repKpiPartidas" class="text-2xl font-black text-white mt-1">0</div></div>
+                <div class="card-navy p-4"><div class="text-[11px] font-bold text-emerald-400 uppercase">Total de Participações</div><div id="repKpiParticipantes" class="text-2xl font-black text-white mt-1">0</div></div>
+                <div class="card-navy p-4"><div class="text-[11px] font-bold text-amber-400 uppercase">Capotes Aplicados</div><div id="repKpiCapotes" class="text-2xl font-black text-white mt-1">0</div></div>
+                <div class="card-navy p-4"><div class="text-[11px] font-bold text-rose-400 uppercase">Generais Registados</div><div id="repKpiGenerais" class="text-2xl font-black text-white mt-1">0</div></div>
+            </div>
+
+            <!-- GRÁFICOS ELEGANTES -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card-navy p-6 space-y-5 bg-gradient-to-b from-slate-900 to-[#111827]">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h4 class="font-black text-white text-xs uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-amber-400 mr-2"></i> Distribuição de Vitórias por Jogador</h4>
+                        <span class="text-[10px] text-amber-400 font-bold bg-amber-500/15 px-2.5 py-1 rounded-full">Top Competidores</span>
+                    </div>
+                    <div id="repPieChartContainer" class="space-y-3 pt-2"></div>
+                </div>
+                <div class="card-navy p-6 space-y-5 bg-gradient-to-b from-slate-900 to-[#111827]">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h4 class="font-black text-white text-xs uppercase tracking-wider"><i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i> Índice de Participação e Atividade</h4>
+                        <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/15 px-2.5 py-1 rounded-full">Presenças</span>
+                    </div>
+                    <div id="repBarChartContainer" class="space-y-3.5 pt-2"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const DB_URL = "https://bairro-tampo-default-rtdb.firebaseio.com/bairro_data.json";
+        let appData = { membros: [], partidas: [], agendadas: [], galeria: [] };
+        let currentUser = null;
+        let deviceMode = 'mobile';
+        let viewingProfileId = null;
+        let liveMatch = { active: false, startTime: null, timerInterval: null, players: [], livrados: {} };
+
+        const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const getAvatar = m => m?.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m?.nome || "Membro")}&background=263247&color=fff`;
+        const isAdmin = () => currentUser?.role === 'admin';
+
+        async function initSystem() {
+            try {
+                const res = await fetch(DB_URL);
+                if (!res.ok) throw new Error("Erro de rede");
+                const data = await res.json();
+                appData = data || { membros: [], partidas: [], agendadas: [], galeria: [] };
+                appData.membros = appData.membros || [];
+                appData.partidas = appData.partidas || [];
+                appData.agendadas = appData.agendadas || [];
+                appData.galeria = appData.galeria || [];
+            } catch (err) {
+                console.warn("A carregar do armazenamento local (fallback)...", err);
+                const local = localStorage.getItem('bairro_local_data');
+                if (local) {
+                    appData = JSON.parse(local);
+                } else {
+                    appData = { membros: [], partidas: [], agendadas: [], galeria: [] };
+                }
+            }
+
+            if (appData.membros.length === 0 || !appData.membros.some(m => m.role === 'admin')) {
+                appData.membros.unshift({
+                    id: 1, nome: "Alano Bango", pass: "1234", primeiroLogin: true, role: "admin", status: "ativo", foto: "", vitorias: 0, capotes: 0, generais: 0
+                });
+            }
+
+            localStorage.setItem('bairro_local_data', JSON.stringify(appData));
+            populateLoginSelect();
+        }
+
+        async function saveToCloud() {
+            localStorage.setItem('bairro_local_data', JSON.stringify(appData));
+            try {
+                await fetch(DB_URL, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(appData) });
+            } catch (err) {
+                console.warn("Aviso: Sincronização em nuvem indisponível, a operar localmente.", err);
+            }
+            renderAll();
+        }
+
+        function resetSystemData() {
+            if (confirm("Tem certeza que deseja apagar todos os dados guardados e reiniciar o sistema do zero?")) {
+                localStorage.removeItem('bairro_local_data');
+                location.reload();
+            }
+        }
+
+        function selectDevice(mode) {
+            deviceMode = mode;
+            document.getElementById('btnDevPC').className = mode === 'pc' ? "p-3 rounded-xl border border-amber-500 bg-amber-500/20 text-white font-bold flex items-center justify-center gap-2 cursor-pointer transition-all" : "p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all";
+            document.getElementById('btnDevMobile').className = mode === 'mobile' ? "p-3 rounded-xl border border-amber-500 bg-amber-500/20 text-white font-bold flex items-center justify-center gap-2 cursor-pointer transition-all" : "p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold flex items-center justify-center gap-2 cursor-pointer transition-all";
+        }
+
+        function populateLoginSelect() {
+            const select = document.getElementById('loginMemberSelect');
+            if (!select) return;
+            select.innerHTML = appData.membros.map(m => `<option value="${m.id}">${esc(m.nome)} ${m.role === 'admin' ? '(Admin)' : ''}</option>`).join('');
+        }
+
+        function executeLogin() {
+            const id = Number(document.getElementById('loginMemberSelect').value);
+            const pass = document.getElementById('loginPasswordInput').value;
+            const errBox = document.getElementById('loginErrorMsg');
+            const membro = appData.membros.find(m => Number(m.id) === id);
+
+            if (!membro || membro.pass !== pass) {
+                errBox.textContent = "Palavra-passe incorreta! (Padrão inicial: 1234)";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            currentUser = membro;
+            document.getElementById('authOverlay').classList.add('hidden');
+
+            if (deviceMode === 'pc') {
+                document.getElementById('desktopSidebar').classList.remove('hidden');
+                document.getElementById('mobileBottomNav').classList.add('hidden');
+            } else {
+                document.getElementById('desktopSidebar').classList.add('hidden');
+                document.getElementById('mobileBottomNav').classList.remove('hidden');
+            }
+
+            updateSessionUI();
+            renderAll();
+            if (membro.primeiroLogin) document.getElementById('firstLoginModal').classList.remove('hidden');
+        }
+
+        function updateSessionUI() {
+            if (!currentUser) return;
+            document.getElementById('sidebarUserName').textContent = currentUser.nome;
+            document.getElementById('sidebarUserRole').textContent = isAdmin() ? 'Administrador' : 'Membro Oficial';
+            document.getElementById('sidebarAvatar').src = getAvatar(currentUser);
+            document.getElementById('headerAvatar').src = getAvatar(currentUser);
+            document.getElementById('welcomeUserTitle').textContent = `Bem-vindo, ${currentUser.nome}!`;
+            document.getElementById('btnOpenAddMember').classList.toggle('hidden', !isAdmin());
+        }
+
+        async function savePersonalPassword() {
+            const newP = document.getElementById('newPersonalPass').value;
+            if (!newP || newP.length < 4) return alert("Mínimo de 4 caracteres.");
+            currentUser.pass = newP;
+            currentUser.primeiroLogin = false;
+            await saveToCloud();
+            document.getElementById('firstLoginModal').classList.add('hidden');
+            alert("Palavra-passe atualizada com sucesso!");
+        }
+
+        function logoutSystem() {
+            currentUser = null;
+            document.getElementById('loginPasswordInput').value = "";
+            document.getElementById('authOverlay').classList.remove('hidden');
+            document.getElementById('desktopSidebar').classList.add('hidden');
+            document.getElementById('mobileBottomNav').classList.add('hidden');
+        }
+
+        function navigate(tab) {
+            ['painel', 'membros', 'mesa', 'classificacao', 'agenda', 'galeria', 'relatorios'].forEach(t => {
+                const sec = document.getElementById(`sec-${t}`);
+                if (sec) sec.classList.add('hidden');
+                const dBtn = document.getElementById(`dnav-${t}`);
+                const mBtn = document.getElementById(`mnav-${t}`);
+                if (dBtn) dBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition text-slate-400 hover:bg-slate-800/60 hover:text-white cursor-pointer";
+                if (mBtn) mBtn.className = "flex flex-col items-center justify-center py-1 text-slate-400";
+            });
+
+            const activeSec = document.getElementById(`sec-${tab}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+            const activeD = document.getElementById(`dnav-${tab}`);
+            const activeM = document.getElementById(`mnav-${tab}`);
+            if (activeD) activeD.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl tab-transition bg-blue-600/20 text-blue-400 border border-blue-500/30 cursor-pointer";
+            if (activeM) activeM.className = "flex flex-col items-center justify-center py-1 text-blue-400 font-bold";
+
+            const titles = { painel: "Painel Principal", membros: "Gestão de Membros", mesa: "Mesa de Jogo", classificacao: "Classificação Geral", agenda: "Agenda e Regulamento", galeria: "Galeria Multimédia", relatorios: "Mapas e Estatísticas" };
+            document.getElementById('viewTitle').textContent = titles[tab];
+
+            if (tab === 'mesa') populateMesaSetup();
+            if (tab === 'classificacao') renderRanking();
+            if (tab === 'agenda') { renderScheduledMatches(); renderHistory(); }
+            if (tab === 'galeria') renderGallery();
+            if (tab === 'relatorios') renderReports();
+        }
+
+        // ================= GESTÃO DE MEMBROS =================
+        function openMemberForm(memberId = null) {
+            if (!isAdmin()) return alert("Apenas administradores podem gerir membros.");
+            const modal = document.getElementById('memberFormModal');
+            if (memberId) {
+                const m = appData.membros.find(x => Number(x.id) === Number(memberId));
+                if (!m) return;
+                document.getElementById('memberFormTitle').textContent = "Editar Membro";
+                document.getElementById('editMemberId').value = m.id;
+                document.getElementById('memberNameInput').value = m.nome;
+                document.getElementById('memberStatusInput').value = m.status || "ativo";
+                document.getElementById('memberRoleInput').value = m.role || "member";
+                document.getElementById('memberPassGroup').classList.add('hidden');
+            } else {
+                document.getElementById('memberFormTitle').textContent = "Cadastrar Novo Membro";
+                document.getElementById('editMemberId').value = "";
+                document.getElementById('memberNameInput').value = "";
+                document.getElementById('memberStatusInput').value = "ativo";
+                document.getElementById('memberRoleInput').value = "member";
+                document.getElementById('memberPassInput').value = "1234";
+                document.getElementById('memberPassGroup').classList.remove('hidden');
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeMemberForm() { document.getElementById('memberFormModal').classList.add('hidden'); }
+
+        async function saveMemberForm() {
+            if (!isAdmin()) return;
+            const editId = document.getElementById('editMemberId').value;
+            const nome = document.getElementById('memberNameInput').value.trim();
+            const status = document.getElementById('memberStatusInput').value;
+            const role = document.getElementById('memberRoleInput').value;
+
+            if (!nome) return alert("Insira o nome do membro.");
+            if (editId) {
+                const m = appData.membros.find(x => Number(x.id) === Number(editId));
+                if (m) { m.nome = nome; m.status = status; m.role = role; }
+            } else {
+                if (appData.membros.some(x => x.nome.toLowerCase() === nome.toLowerCase())) return alert("Já existe um membro com este nome.");
+                appData.membros.push({ id: Date.now(), nome, pass: document.getElementById('memberPassInput').value || "1234", primeiroLogin: true, role, status, foto: "", vitorias: 0, capotes: 0, generais: 0 });
+            }
+            await saveToCloud();
+            populateLoginSelect();
+            closeMemberForm();
+        }
+
+        async function deleteMember(id) {
+            if (!isAdmin()) return;
+            if (Number(id) === Number(currentUser.id)) return alert("Não pode remover a sua própria conta.");
+            if (!confirm("Tem certeza que deseja remover este membro?")) return;
+            appData.membros = appData.membros.filter(m => Number(m.id) !== Number(id));
+            await saveToCloud();
+            populateLoginSelect();
+        }
+
+        function calcWinRate(m) {
+            const t = (m.vitorias || 0) + (m.generais || 0);
+            return t === 0 ? 0 : Math.round(((m.vitorias || 0) / t) * 100);
+        }
+
+        function countParticipations(memberId) {
+            return appData.partidas.filter(p => (p.jogadores && p.jogadores.includes(Number(memberId))) || p.vencedor === appData.membros.find(m => m.id === memberId)?.nome).length;
+        }
+
+        function openMemberProfile(id) {
+            const m = appData.membros.find(x => Number(x.id) === Number(id));
+            if (!m) return;
+            viewingProfileId = m.id;
+            document.getElementById('profModalAvatar').src = getAvatar(m);
+            document.getElementById('profModalName').textContent = m.nome;
+            document.getElementById('profModalRole').textContent = m.role === 'admin' ? '👑 Administrador' : '🎲 Membro Oficial';
+            document.getElementById('profModalStatus').textContent = (m.status || 'ativo') === 'ativo' ? '🟢 Ativo' : '🟡 Inativo';
+            document.getElementById('profChangePhotoBtn').classList.toggle('hidden', !(Number(currentUser.id) === Number(m.id) || isAdmin()));
+            document.getElementById('profStatVitorias').textContent = m.vitorias || 0;
+            document.getElementById('profStatCapotes').textContent = m.capotes || 0;
+            document.getElementById('profStatGenerais').textContent = m.generais || 0;
+            document.getElementById('profStatTaxa').textContent = `${calcWinRate(m)}%`;
+
+            const histList = document.getElementById('profHistoryList');
+            const matches = appData.partidas.filter(p => (p.jogadores && p.jogadores.includes(Number(m.id))) || p.vencedor === m.nome);
+            histList.innerHTML = matches.length === 0 ? `<p class="text-slate-500 text-center py-2">Sem partidas registadas.</p>` : matches.map(p => `
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div><span class="text-amber-400 font-bold">Partida Nº ${esc(p.numero)}</span><span class="text-slate-500 text-[10px] ml-2">${esc(p.data)}</span><div class="text-[11px] text-slate-300 mt-0.5">${p.vencedor === m.nome ? '🏆 Venceu' : esc(p.detalhe)}</div></div>
+                </div>`).join('');
+            document.getElementById('memberProfileModal').classList.remove('hidden');
+        }
+
+        function closeMemberProfile() { document.getElementById('memberProfileModal').classList.add('hidden'); viewingProfileId = null; }
+
+        function uploadProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200; canvas.height = 200;
+                    canvas.getContext('2d').drawImage(img, 0, 0, 200, 200);
+                    const foto = canvas.toDataURL('image/jpeg', 0.8);
+                    const m = appData.membros.find(x => Number(x.id) === Number(viewingProfileId));
+                    if (m) {
+                        m.foto = foto;
+                        if (Number(m.id) === Number(currentUser.id)) currentUser.foto = foto;
+                        await saveToCloud();
+                        updateSessionUI();
+                        document.getElementById('profModalAvatar').src = foto;
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderMembers() {
+            const grid = document.getElementById('membersGrid');
+            const query = (document.getElementById('memberSearchInput')?.value || "").toLowerCase();
+            const filter = document.getElementById('memberFilterSelect')?.value || "todos";
+            const filtered = appData.membros.filter(m => {
+                if (!m.nome.toLowerCase().includes(query)) return false;
+                if (filter === 'ativo') return (m.status || 'ativo') === 'ativo';
+                if (filter === 'inativo') return m.status === 'inativo';
+                if (filter === 'admin') return m.role === 'admin';
+                return true;
+            });
+
+            grid.innerHTML = filtered.length === 0 ? `<div class="col-span-full card-navy p-6 text-center text-xs text-slate-500">Nenhum membro encontrado.</div>` : filtered.map(m => `
+                <div class="card-navy p-4 sm:p-5 flex flex-col justify-between gap-4">
+                    <div onclick="openMemberProfile(${m.id})" class="flex items-center gap-3.5 cursor-pointer">
+                        <img src="${esc(getAvatar(m))}" class="w-14 h-14 rounded-2xl object-cover border border-slate-700 shadow-md" alt="Avatar">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-black text-sm text-white truncate">${esc(m.nome)}</h4>
+                            <p class="text-[11px] text-amber-400 font-semibold">${m.role === 'admin' ? '👑 Administrador' : 'Membro Oficial'}</p>
+                            <div class="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
+                                <span>🏆 ${m.vitorias || 0}</span><span>🔥 ${m.capotes || 0}</span><span>💀 ${m.generais || 0}</span><span class="text-emerald-400 font-bold">${calcWinRate(m)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-800 text-xs">
+                        <button type="button" onclick="openMemberProfile(${m.id})" class="text-blue-400 font-bold hover:underline cursor-pointer">Ver Ficha</button>
+                        ${isAdmin() ? `<div class="flex gap-3"><button type="button" onclick="openMemberForm(${m.id})" class="text-slate-300 hover:text-white cursor-pointer"><i class="fa-solid fa-pen"></i></button>${Number(m.id) !== Number(currentUser.id) ? `<button type="button" onclick="deleteMember(${m.id})" class="text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}</div>` : ''}
+                    </div>
+                </div>`).join('');
+        }
+
+        // ================= MESA DE JOGO & RETROATIVO =================
+        function populateMesaSetup() {
+            const activeMembers = appData.membros.filter(m => (m.status || 'ativo') === 'ativo');
+            ['mesaSeat1', 'mesaSeat2', 'mesaSeat3', 'mesaSeat4'].forEach((selId, idx) => {
+                const el = document.getElementById(selId);
+                if (el) el.innerHTML = activeMembers.map((m, i) => `<option value="${m.id}" ${i === idx ? 'selected' : ''}>${esc(m.nome)}</option>`).join('');
+            });
+        }
+
+        function startLiveMatch(presetIds = null) {
+            const ids = presetIds || [1, 2, 3, 4].map(n => Number(document.getElementById(`mesaSeat${n}`).value));
+            if (new Set(ids).size !== 4) return alert("Os 4 participantes da mesa devem ser diferentes.");
+
+            liveMatch = { active: true, startTime: Date.now(), players: ids, livrados: {} };
+
+            document.getElementById('mesaSetupCard').classList.add('hidden');
+            document.getElementById('mesaLiveCard').classList.remove('hidden');
+            document.getElementById('badgeMesaSidebar').classList.remove('hidden');
+            document.getElementById('dashboardMesaStatusBadge').className = "bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase animate-pulse";
+            document.getElementById('dashboardMesaStatusBadge').textContent = "● Em Andamento";
+
+            if (liveMatch.timerInterval) clearInterval(liveMatch.timerInterval);
+            liveMatch.timerInterval = setInterval(updateMatchTimer, 1000);
+
+            renderLiveMesaVisual();
+            populatePodiumSelects();
+            navigate('mesa');
+        }
+
+        function updateMatchTimer() {
+            const diff = Math.floor((Date.now() - liveMatch.startTime) / 1000);
+            const mins = String(Math.floor(diff / 60)).padStart(2, '0');
+            const secs = String(diff % 60).padStart(2, '0');
+            const timerEl = document.getElementById('matchTimerDisplay');
+            if (timerEl) timerEl.textContent = `${mins}:${secs}`;
+        }
+
+        function renderLiveMesaVisual() {
+            const grid = document.getElementById('mesaVisualGrid');
+            if (!grid) return;
+            grid.innerHTML = liveMatch.players.map((idM, idx) => {
+                const m = appData.membros.find(x => Number(x.id) === Number(idM));
+                if (!m) return '';
+                const isLivrado = liveMatch.livrados[idM] || false;
+                return `
+                <div class="card-navy p-4 flex flex-col justify-between gap-3 border ${isLivrado ? 'border-emerald-500/50 bg-emerald-950/20' : 'border-slate-800'}">
+                    <div class="flex items-center gap-3">
+                        <img src="${esc(getAvatar(m))}" class="w-11 h-11 rounded-xl object-cover border border-slate-700" alt="Avatar">
+                        <div class="min-w-0 flex-1"><span class="text-[10px] font-bold text-amber-400 uppercase">Cadeira 0${idx + 1}</span><h5 class="font-black text-sm text-white truncate">${esc(m.nome)}</h5></div>
+                    </div>
+                    <label class="flex items-center justify-between bg-slate-950/70 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs">
+                        <span class="font-semibold text-slate-300">Peça Livrada?</span>
+                        <span class="flex items-center gap-2"><input type="checkbox" ${isLivrado ? 'checked' : ''} onchange="toggleLivrado(${m.id})" class="accent-emerald-500 w-4 h-4 cursor-pointer"><strong class="${isLivrado ? 'text-emerald-400' : 'text-slate-500'}">${isLivrado ? 'Sim 🟢' : 'Não'}</strong></span>
+                    </label>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleLivrado(id) { liveMatch.livrados[id] = !liveMatch.livrados[id]; renderLiveMesaVisual(); }
+
+        function populatePodiumSelects() {
+            const options = liveMatch.players.map(idM => {
+                const m = appData.membros.find(x => Number(x.id) === Number(idM));
+                return `<option value="${m.id}">${esc(m.nome)}</option>`;
+            }).join('');
+            document.getElementById('resWinnerSelect').innerHTML = options;
+            document.getElementById('resGeneralSelect').innerHTML = options;
+            updatePodiumOptions();
+        }
+
+        function updatePodiumOptions() {
+            const winnerId = Number(document.getElementById('resWinnerSelect').value);
+            const genSelect = document.getElementById('resGeneralSelect');
+            const remaining = liveMatch.players.filter(id => Number(id) !== winnerId);
+            genSelect.innerHTML = remaining.map(idM => {
+                const m = appData.membros.find(x => Number(x.id) === Number(idM));
+                return `<option value="${m.id}">${esc(m.nome)}</option>`;
+            }).join('');
+        }
+
+        function toggleOutcomeType() {
+            const type = document.getElementById('resOutcomeSelect').value;
+            document.getElementById('resGeneralBox').classList.toggle('hidden', type === 'capote');
+        }
+
+        function cancelLiveMatch() {
+            if (!confirm("Tem certeza que deseja cancelar esta partida em andamento?")) return;
+            clearInterval(liveMatch.timerInterval);
+            liveMatch.active = false;
+            document.getElementById('mesaLiveCard').classList.add('hidden');
+            document.getElementById('mesaSetupCard').classList.remove('hidden');
+            document.getElementById('badgeMesaSidebar').classList.add('hidden');
+            document.getElementById('dashboardMesaStatusBadge').className = "bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase";
+            document.getElementById('dashboardMesaStatusBadge').textContent = "Livre";
+        }
+
+        async function finalizeLiveMatch() {
+            if (!isAdmin()) return alert("Apenas administradores podem registar resultados.");
+            const winnerId = Number(document.getElementById('resWinnerSelect').value);
+            const outcome = document.getElementById('resOutcomeSelect').value;
+            const winner = appData.membros.find(m => Number(m.id) === winnerId);
+            if (!winner) return;
+
+            winner.vitorias = (winner.vitorias || 0) + 1;
+            let detail = "";
+
+            if (outcome === 'capote') {
+                winner.capotes = (winner.capotes || 0) + 1;
+                liveMatch.players.forEach(idM => {
+                    if (Number(idM) !== winnerId) {
+                        const gm = appData.membros.find(x => Number(x.id) === Number(idM));
+                        if (gm) gm.generais = (gm.generais || 0) + 1;
+                    }
+                });
+                detail = `Capote Total aplicado por ${winner.nome}!`;
+            } else {
+                const genId = Number(document.getElementById('resGeneralSelect').value);
+                const general = appData.membros.find(m => Number(m.id) === genId);
+                if (!general || general.id === winnerId) return alert("Selecione corretamente o General.");
+                general.generais = (general.generais || 0) + 1;
+                detail = `General (Erritado): ${general.nome}`;
+            }
+
+            const diffSecs = Math.floor((Date.now() - liveMatch.startTime) / 1000);
+            const mins = String(Math.floor(diffSecs / 60)).padStart(2, '0');
+            const secs = String(diffSecs % 60).padStart(2, '0');
+            const duracaoStr = `${mins}:${secs}`;
+
+            const num = String(appData.partidas.length + 1).padStart(3, '0');
+            appData.partidas.unshift({
+                numero: num,
+                data: new Date().toLocaleString('pt-AO'),
+                timestamp: Date.now(),
+                duracao: duracaoStr,
+                vencedor: winner.nome,
+                detalhe: detail,
+                jogadores: liveMatch.players
+            });
+
+            await saveToCloud();
+            clearInterval(liveMatch.timerInterval);
+            liveMatch.active = false;
+            document.getElementById('mesaLiveCard').classList.add('hidden');
+            document.getElementById('mesaSetupCard').classList.remove('hidden');
+            document.getElementById('badgeMesaSidebar').classList.add('hidden');
+            document.getElementById('dashboardMesaStatusBadge').className = "bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase";
+            document.getElementById('dashboardMesaStatusBadge').textContent = "Livre";
+
+            alert(`Partida Oficial Nº ${num} guardada com sucesso!`);
+            navigate('relatorios');
+        }
+
+        // REGISTO RETROATIVO DE PARTIDAS
+        function openRetroMatchModal() {
+            if (!isAdmin()) return alert("Apenas administradores podem adicionar partidas passadas.");
+            const activeMembers = appData.membros.filter(m => (m.status || 'ativo') === 'ativo');
+            ['retroSeat1', 'retroSeat2', 'retroSeat3', 'retroSeat4'].forEach((id, idx) => {
+                document.getElementById(id).innerHTML = activeMembers.map((m, i) => `<option value="${m.id}" ${i === idx ? 'selected' : ''}>${esc(m.nome)}</option>`).join('');
+            });
+            document.getElementById('retroDateInput').value = new Date().toISOString().split('T')[0];
+            populateRetroWinner();
+            document.getElementById('retroMatchModal').classList.remove('hidden');
+        }
+
+        function closeRetroMatchModal() { document.getElementById('retroMatchModal').classList.add('hidden'); }
+
+        function populateRetroWinner() {
+            const ids = [1, 2, 3, 4].map(n => Number(document.getElementById(`retroSeat${n}`).value));
+            const winnerSel = document.getElementById('retroWinnerSelect');
+            winnerSel.innerHTML = ids.map(idM => {
+                const m = appData.membros.find(x => Number(x.id) === Number(idM));
+                return `<option value="${m.id}">${esc(m.nome)}</option>`;
+            }).join('');
+            updateRetroGeneralOptions();
+        }
+
+        function updateRetroGeneralOptions() {
+            const ids = [1, 2, 3, 4].map(n => Number(document.getElementById(`retroSeat${n}`).value));
+            const winnerId = Number(document.getElementById('retroWinnerSelect').value);
+            const genSel = document.getElementById('retroGeneralSelect');
+            const remaining = ids.filter(id => Number(id) !== winnerId);
+            genSel.innerHTML = remaining.map(idM => {
+                const m = appData.membros.find(x => Number(x.id) === Number(idM));
+                return `<option value="${m.id}">${esc(m.nome)}</option>`;
+            }).join('');
+        }
+
+        function toggleRetroOutcome() {
+            const type = document.getElementById('retroOutcomeSelect').value;
+            document.getElementById('retroGeneralBox').classList.toggle('hidden', type === 'capote');
+        }
+
+        ['retroSeat1', 'retroSeat2', 'retroSeat3', 'retroSeat4'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', populateRetroWinner);
+        });
+        document.getElementById('retroWinnerSelect')?.addEventListener('change', updateRetroGeneralOptions);
+
+        async function saveRetroMatch() {
+            if (!isAdmin()) return;
+            const ids = [1, 2, 3, 4].map(n => Number(document.getElementById(`retroSeat${n}`).value));
+            if (new Set(ids).size !== 4) return alert("Os 4 participantes da mesa devem ser diferentes.");
+
+            const winnerId = Number(document.getElementById('retroWinnerSelect').value);
+            const outcome = document.getElementById('retroOutcomeSelect').value;
+            const dateVal = document.getElementById('retroDateInput').value;
+
+            const winner = appData.membros.find(m => Number(m.id) === winnerId);
+            if (!winner) return;
+
+            winner.vitorias = (winner.vitorias || 0) + 1;
+            let detail = "";
+
+            if (outcome === 'capote') {
+                winner.capotes = (winner.capotes || 0) + 1;
+                ids.forEach(idM => {
+                    if (Number(idM) !== winnerId) {
+                        const gm = appData.membros.find(x => Number(x.id) === Number(idM));
+                        if (gm) gm.generais = (gm.generais || 0) + 1;
+                    }
+                });
+                detail = `Capote Total aplicado por ${winner.nome}! (Registo Passado)`;
+            } else {
+                const genId = Number(document.getElementById('retroGeneralSelect').value);
+                const general = appData.membros.find(m => Number(m.id) === genId);
+                if (!general || general.id === winnerId) return alert("Selecione corretamente o General.");
+                general.generais = (general.generais || 0) + 1;
+                detail = `General (Erritado): ${general.nome} (Registo Passado)`;
+            }
+
+            const formattedDate = dateVal ? new Date(dateVal).toLocaleDateString('pt-AO') : new Date().toLocaleDateString('pt-AO');
+            const num = String(appData.partidas.length + 1).padStart(3, '0');
+            appData.partidas.unshift({
+                numero: num,
+                data: formattedDate,
+                timestamp: dateVal ? new Date(dateVal).getTime() : Date.now(),
+                duracao: "Passada",
+                vencedor: winner.nome,
+                detalhe: detail,
+                jogadores: ids
+            });
+
+            await saveToCloud();
+            closeRetroMatchModal();
+            alert(`Partida passada Nº ${num} adicionada com sucesso!`);
+            navigate('relatorios');
+        }
+
+        // ================= GALERIA MULTIMÉDIA =================
+        function uploadMediaFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async e => {
+                const isVideo = file.type.startsWith('video');
+                appData.galeria.unshift({
+                    id: Date.now(),
+                    tipo: isVideo ? 'video' : 'imagem',
+                    url: e.target.result,
+                    nome: file.name,
+                    data: new Date().toLocaleString('pt-AO'),
+                    autor: currentUser?.nome || 'Admin'
+                });
+                await saveToCloud();
+                renderGallery();
+                alert("Ficheiro carregado com sucesso para a galeria!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function deleteMediaItem(id) {
+            if (!isAdmin()) return alert("Apenas administradores podem apagar itens da galeria.");
+            if (!confirm("Remover este ficheiro da galeria?")) return;
+            appData.galeria = appData.galeria.filter(item => Number(item.id) !== Number(id));
+            await saveToCloud();
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('mediaGalleryGrid');
+            if (!grid) return;
+            if (!appData.galeria || appData.galeria.length === 0) {
+                grid.innerHTML = `<div class="col-span-full card-navy p-8 text-center text-xs text-slate-500">Ainda não existem fotos ou vídeos na galeria. Clique em "Carregar Foto ou Vídeo" acima.</div>`;
+                return;
+            }
+
+            grid.innerHTML = appData.galeria.map(item => `
+                <div class="card-navy overflow-hidden flex flex-col justify-between group">
+                    <div class="relative h-48 bg-slate-950 flex items-center justify-center overflow-hidden">
+                        ${item.tipo === 'video' ? 
+                            `<video src="${item.url}" controls class="w-full h-full object-cover"></video>` : 
+                            `<img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Mídia">`
+                        }
+                        <span class="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-md text-amber-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase">${item.tipo === 'video' ? '🎥 Vídeo' : '📷 Foto'}</span>
+                    </div>
+                    <div class="p-4 space-y-2 text-xs">
+                        <div class="flex justify-between items-center text-slate-400 text-[11px]">
+                            <span>Por: <strong class="text-white">${esc(item.autor)}</strong></span>
+                            <span>${esc(item.data)}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+                            <span class="truncate text-slate-300 font-semibold max-w-[180px]">${esc(item.nome)}</span>
+                            ${isAdmin() ? `<button type="button" onclick="deleteMediaItem(${item.id})" class="text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        // ================= CLASSIFICAÇÃO & PÓDIO =================
+        function renderRanking() {
+            const sorted = [...appData.membros].sort((a, b) => {
+                if ((b.vitorias || 0) !== (a.vitorias || 0)) return (b.vitorias || 0) - (a.vitorias || 0);
+                if ((b.capotes || 0) !== (a.capotes || 0)) return (b.capotes || 0) - (a.capotes || 0);
+                if ((a.generais || 0) !== (b.generais || 0)) return (a.generais || 0) - (b.generais || 0);
+                return calcWinRate(b) - calcWinRate(a);
+            });
+
+            const top3Container = document.getElementById('rankingTop3Container');
+            const dashboardTop3 = document.getElementById('dashboardTop3');
+            const medals = [
+                { title: "Rei do Tampo (1º)", color: "from-amber-500/20 border-amber-500/50 text-amber-400", icon: "fa-crown", badgeBg: "bg-amber-500 text-slate-950" },
+                { title: "Vice-Rei (2º)", color: "from-slate-400/15 border-slate-400/40 text-slate-300", icon: "fa-medal", badgeBg: "bg-slate-300 text-slate-950" },
+                { title: "3º Classificado", color: "from-amber-700/20 border-amber-700/40 text-amber-600", icon: "fa-award", badgeBg: "bg-amber-700 text-white" }
+            ];
+
+            const top3Html = [0, 1, 2].map(idx => {
+                const m = sorted[idx];
+                const medal = medals[idx];
+                if (!m) return `<div class="card-navy p-5 text-center text-xs text-slate-500 flex items-center justify-center">Sem registo para o ${idx + 1}º lugar</div>`;
+                return `
+                <div class="card-navy bg-gradient-to-b ${medal.color} p-5 rounded-2xl flex flex-col items-center text-center gap-3 shadow-xl">
+                    <span class="${medal.badgeBg} text-[10px] font-black px-3 py-1 rounded-full uppercase"><i class="fa-solid ${medal.icon} mr-1"></i> ${medal.title}</span>
+                    <img src="${esc(getAvatar(m))}" class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-lg" alt="Avatar">
+                    <div><h4 class="text-base font-black text-white">${esc(m.nome)}</h4><p class="text-[11px] text-slate-400">${m.role === 'admin' ? 'Administrador' : 'Membro Oficial'}</p></div>
+                    <div class="grid grid-cols-3 w-full gap-2 pt-2 border-t border-slate-800 text-xs">
+                        <div><div class="text-[9px] text-slate-400 font-bold uppercase">Vitórias</div><div class="font-black text-amber-400 text-sm">${m.vitorias || 0}</div></div>
+                        <div><div class="text-[9px] text-slate-400 font-bold uppercase">Capotes</div><div class="font-black text-blue-400 text-sm">${m.capotes || 0}</div></div>
+                        <div><div class="text-[9px] text-slate-400 font-bold uppercase">% Vit</div><div class="font-black text-emerald-400 text-sm">${calcWinRate(m)}%</div></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            if (top3Container) top3Container.innerHTML = top3Html;
+            if (dashboardTop3) dashboardTop3.innerHTML = top3Html;
+
+            const tbody = document.getElementById('rankingTableBody');
+            if (tbody) {
+                if (sorted.length === 0) { tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500">Nenhum membro registado.</td></tr>`; return; }
+
+                const participationMap = sorted.map(m => ({ ...m, parts: countParticipations(m.id) }));
+                participationMap.sort((a, b) => b.parts - a.parts);
+                const mostActive = participationMap[0];
+                if (mostActive && mostActive.parts > 0) {
+                    document.getElementById('badgeMostActivePlayer').innerHTML = `<i class="fa-solid fa-fire text-amber-400 mr-1"></i> Mais Ativo: <strong>${esc(mostActive.nome)}</strong> (${mostActive.parts} jogos)`;
+                } else {
+                    document.getElementById('badgeMostActivePlayer').textContent = `Sem partidas jogadas`;
+                }
+
+                tbody.innerHTML = sorted.map((m, idx) => {
+                    const parts = countParticipations(m.id);
+                    const posBadge = idx === 0 ? '👑 1º' : idx === 1 ? '🥈 2º' : idx === 2 ? '🥉 3º' : `${idx + 1}º`;
+                    return `
+                    <tr class="hover:bg-slate-900/60 transition-all cursor-pointer" onclick="openMemberProfile(${m.id})">
+                        <td class="p-3.5 text-center font-black text-amber-400">${posBadge}</td>
+                        <td class="p-3.5 flex items-center gap-3"><img src="${esc(getAvatar(m))}" class="w-9 h-9 rounded-xl object-cover border border-slate-700" alt="Avatar"><div><div class="font-bold text-white">${esc(m.nome)}</div><div class="text-[10px] text-slate-500">${m.role === 'admin' ? 'Admin' : 'Membro'}</div></div></td>
+                        <td class="p-3.5 text-center font-black text-amber-400">${m.vitorias || 0}</td>
+                        <td class="p-3.5 text-center font-bold text-blue-400">${m.capotes || 0}</td>
+                        <td class="p-3.5 text-center font-bold text-rose-400">${m.generais || 0}</td>
+                        <td class="p-3.5 text-center font-semibold text-slate-300">${parts}</td>
+                        <td class="p-3.5 text-center font-bold text-emerald-400">${calcWinRate(m)}%</td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // ================= AGENDA E HISTÓRICO =================
+        function switchAgendaTab(tab) {
+            ['agendadas', 'historico', 'regulamento'].forEach(t => {
+                const pane = document.getElementById(`agenda${t.charAt(0).toUpperCase() + t.slice(1)}Pane`);
+                const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (pane) pane.classList.toggle('hidden', t !== tab);
+                if (btn) btn.className = t === tab ? "px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold transition-all cursor-pointer shrink-0" : "px-4 py-2.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white transition-all cursor-pointer shrink-0";
+            });
+        }
+
+        function openScheduleModal() {
+            if (!isAdmin()) return alert("Apenas administradores podem agendar partidas.");
+            const activeMembers = appData.membros.filter(m => (m.status || 'ativo') === 'ativo');
+            ['schedSeat1', 'schedSeat2', 'schedSeat3', 'schedSeat4'].forEach((id, idx) => {
+                document.getElementById(id).innerHTML = activeMembers.map((m, i) => `<option value="${m.id}" ${i === idx ? 'selected' : ''}>${esc(m.nome)}</option>`).join('');
+            });
+            document.getElementById('schedDateInput').value = new Date().toISOString().split('T')[0];
+            document.getElementById('schedTimeInput').value = "15:00";
+            document.getElementById('scheduleMatchModal').classList.remove('hidden');
+        }
+
+        function closeScheduleModal() { document.getElementById('scheduleMatchModal').classList.add('hidden'); }
+
+        async function saveScheduledMatch() {
+            if (!isAdmin()) return;
+            const date = document.getElementById('schedDateInput').value;
+            const time = document.getElementById('schedTimeInput').value;
+            const ids = [1, 2, 3, 4].map(n => Number(document.getElementById(`schedSeat${n}`).value));
+
+            if (!date || !time) return alert("Insira data e horário.");
+            if (new Set(ids).size !== 4) return alert("Os 4 participantes devem ser diferentes.");
+
+            appData.agendadas.push({ id: Date.now(), data: date, horario: time, jogadores: ids });
+            await saveToCloud();
+            closeScheduleModal();
+            renderScheduledMatches();
+        }
+
+        async function cancelScheduledMatch(id) {
+            if (!isAdmin()) return;
+            if (!confirm("Cancelar este agendamento?")) return;
+            appData.agendadas = appData.agendadas.filter(s => Number(s.id) !== Number(id));
+            await saveToCloud();
+            renderScheduledMatches();
+        }
+
+        function startScheduledMatch(schedId) {
+            const s = appData.agendadas.find(x => Number(x.id) === Number(schedId));
+            if (!s) return;
+            appData.agendadas = appData.agendadas.filter(x => Number(x.id) !== Number(schedId));
+            saveToCloud();
+            startLiveMatch(s.jogadores);
+        }
+
+        function renderScheduledMatches() {
+            const list = document.getElementById('scheduledMatchesList');
+            if (!list) return;
+            if (!appData.agendadas || appData.agendadas.length === 0) {
+                list.innerHTML = `<div class="col-span-full card-navy p-6 text-center text-xs text-slate-500">Nenhuma partida agendada de momento.</div>`;
+                return;
+            }
+            list.innerHTML = appData.agendadas.map(s => {
+                const names = s.jogadores.map(id => appData.membros.find(x => Number(x.id) === Number(id))?.nome || 'Convidado').join(', ');
+                return `
+                <div class="card-navy p-4 flex flex-col justify-between gap-3 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-amber-500/15 text-amber-400 px-3 py-1 rounded-full font-bold"><i class="fa-solid fa-calendar mr-1.5"></i> ${esc(s.data)} às ${esc(s.horario)}</span>
+                        ${isAdmin() ? `<button type="button" onclick="cancelScheduledMatch(${s.id})" class="text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                    <div class="text-slate-300"><strong>Participantes:</strong> ${names}</div>
+                    <button type="button" onclick="startScheduledMatch(${s.id})" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl cursor-pointer transition-all"><i class="fa-solid fa-play mr-1.5"></i> Iniciar na Mesa</button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyMatchesList');
+            const query = (document.getElementById('historySearchInput')?.value || "").toLowerCase();
+            const dateFilter = document.getElementById('historyDateFilter')?.value || "";
+            if (!list) return;
+
+            const filtered = appData.partidas.filter(p => {
+                const matchText = (p.numero + "").includes(query) || p.vencedor.toLowerCase().includes(query) || p.detalhe.toLowerCase().includes(query);
+                if (!matchText) return false;
+                if (dateFilter) {
+                    const parts = dateFilter.split('-');
+                    const formattedFilter = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    if (!p.data.includes(formattedFilter) && !p.data.includes(dateFilter)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="card-navy p-6 text-center text-xs text-slate-500">Nenhum registo histórico encontrado.</div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(p => {
+                const playersNames = (p.jogadores || []).map(idM => appData.membros.find(x => Number(x.id) === Number(idM))?.nome || 'Participante').join(' • ');
+                return `
+                <div class="card-navy p-4 space-y-3 text-xs">
+                    <div class="flex justify-between border-b border-slate-800 pb-2.5">
+                        <div class="flex items-center gap-2"><span class="bg-amber-500/20 text-amber-400 px-2.5 py-0.5 rounded font-black">Partida Nº ${esc(p.numero)}</span><span class="text-slate-400 text-[11px]"><i class="fa-solid fa-clock text-amber-400 mr-1"></i> ${esc(p.duracao || '00:00')}</span></div>
+                        <span class="text-slate-500 text-[11px]">${esc(p.data)}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
+                        <div><strong>Participantes:</strong> ${playersNames}</div>
+                        <div><strong>Vencedor:</strong> <span class="text-amber-400 font-bold">${esc(p.vencedor)}</span></div>
+                    </div>
+                    <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-[11px] text-slate-300"><strong>Desfecho:</strong> ${esc(p.detalhe)}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // ================= MAPAS E RELATÓRIOS (GRÁFICOS ELEGANTES) =================
+        function renderReports() {
+            const period = document.getElementById('reportPeriodSelect')?.value || 'geral';
+            const now = new Date();
+
+            const filteredMatches = appData.partidas.filter(p => {
+                if (period === 'geral') return true;
+                if (!p.timestamp) return true;
+                const pDate = new Date(p.timestamp);
+
+                if (period === 'diario') {
+                    return pDate.toDateString() === now.toDateString();
+                } else if (period === 'semanal') {
+                    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return pDate >= oneWeekAgo;
+                } else if (period === 'mensal') {
+                    return pDate.getMonth() === now.getMonth() && pDate.getFullYear() === now.getFullYear();
+                } else if (period === 'anual') {
+                    return pDate.getFullYear() === now.getFullYear();
+                }
+                return true;
+            });
+
+            const totalPartidas = filteredMatches.length;
+            let totalParticipantes = 0;
+            let totalCapotes = 0;
+            let totalGenerais = 0;
+
+            filteredMatches.forEach(p => {
+                totalParticipantes += (p.jogadores || []).length;
+                if (p.detalhe && p.detalhe.includes('Capote')) totalCapotes++;
+                if (p.detalhe && p.detalhe.includes('General')) totalGenerais++;
+            });
+
+            document.getElementById('repKpiPartidas').textContent = totalPartidas;
+            document.getElementById('repKpiParticipantes').textContent = totalParticipantes;
+            document.getElementById('repKpiCapotes').textContent = totalCapotes;
+            document.getElementById('repKpiGenerais').textContent = totalGenerais;
+
+            // GRÁFICO 1: DISTRIBUIÇÃO DE VITÓRIAS
+            const topWinners = [...appData.membros].sort((a, b) => (b.vitorias || 0) - (a.vitorias || 0)).slice(0, 5);
+            const maxVit = Math.max(...topWinners.map(w => w.vitorias || 0), 1);
+            const pieContainer = document.getElementById('repPieChartContainer');
+
+            if (pieContainer) {
+                pieContainer.innerHTML = topWinners.map(m => {
+                    const vit = m.vitorias || 0;
+                    const pct = Math.round((vit / maxVit) * 100);
+                    return `
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between font-bold text-slate-300">
+                            <span class="flex items-center gap-2"><img src="${esc(getAvatar(m))}" class="w-5 h-5 rounded-lg object-cover">${esc(m.nome)}</span>
+                            <span class="text-amber-400 font-black">${vit} vitória(s) (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 h-full rounded-full transition-all duration-500 shadow-lg" style="width: ${Math.max(pct, 5)}%"></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // GRÁFICO 2: ATIVIDADE
+            const activeMembers = appData.membros.filter(m => (m.status || 'ativo') === 'ativo');
+            const memberStats = activeMembers.map(m => {
+                const parts = filteredMatches.filter(p => (p.jogadores && p.jogadores.includes(Number(m.id))) || p.vencedor === m.nome).length;
+                return { ...m, parts };
+            });
+            memberStats.sort((a, b) => b.parts - a.parts);
+            const maxParts = Math.max(...memberStats.map(m => m.parts), 1);
+            const barContainer = document.getElementById('repBarChartContainer');
+
+            if (barContainer) {
+                barContainer.innerHTML = memberStats.map(m => {
+                    const pct = Math.round((m.parts / maxParts) * 100);
+                    return `
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between font-bold text-slate-300">
+                            <span class="flex items-center gap-2"><img src="${esc(getAvatar(m))}" class="w-5 h-5 rounded-lg object-cover">${esc(m.nome)}</span>
+                            <span class="text-emerald-400 font-black">${m.parts} jogo(s)</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-3.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
+                            <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500 shadow-lg" style="width: ${Math.max(pct, 5)}%"></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        function exportOfficialReport() {
+            const period = document.getElementById('reportPeriodSelect')?.value || 'geral';
+            let reportText = `=========================================
+`;
+            reportText += ` RELATÓRIO OFICIAL - O BAIRRO-DO-NÃO-TE-ERRITES
+`;
+            reportText += ` Período: ${period.toUpperCase()} | Data: ${new Date().toLocaleString('pt-AO')}
+`;
+            reportText += `=========================================
+
+`;
+
+            reportText += `RESUMO GERAL:
+`;
+            reportText += `- Total de Partidas: ${document.getElementById('repKpiPartidas').textContent}
+`;
+            reportText += `- Total de Participações: ${document.getElementById('repKpiParticipantes').textContent}
+`;
+            reportText += `- Capotes Aplicados: ${document.getElementById('repKpiCapotes').textContent}
+`;
+            reportText += `- Generais Registados: ${document.getElementById('repKpiGenerais').textContent}
+
+`;
+
+            reportText += `RANKING DOS MEMBROS:
+`;
+            appData.membros.forEach((m, idx) => {
+                reportText += `${idx + 1}. ${m.nome} - Vitórias: ${m.vitorias || 0} | Capotes: ${m.capotes || 0} | Generais: ${m.generais || 0} | % Vitória: ${calcWinRate(m)}%
+`;
+            });
+
+            reportText += `
+=========================================
+`;
+            reportText += ` Tampo Oficial • Angola • Sistema do Bairro
+`;
+
+            const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Relatorio_Bairro_${period}_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function renderAll() {
+            document.getElementById('kpiPartidas').textContent = appData.partidas.length;
+            document.getElementById('kpiMembros').textContent = appData.membros.filter(m => (m.status || 'ativo') === 'ativo').length;
+            document.getElementById('kpiCapotes').textContent = appData.membros.reduce((a, m) => a + (m.capotes || 0), 0);
+            document.getElementById('kpiGenerais').textContent = appData.membros.reduce((a, m) => a + (m.generais || 0), 0);
+            renderMembers();
+            renderRanking();
+            renderScheduledMatches();
+            renderHistory();
+            renderGallery();
+            renderReports();
+        }
+
+        window.onload = initSystem;
+    </script>
+</body>
+</html>
